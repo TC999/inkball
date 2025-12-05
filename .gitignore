@@ -24,3 +24,6 @@ target
 # Added by cargo
 
 /target
+
+# ida 反编译伪代码
+/decompile
