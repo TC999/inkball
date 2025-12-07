@@ -10,7 +10,7 @@ pub enum TileType {
     Drain(BoardColor),   // Captures balls of matching color
     RLColored(BoardColor),  // Red/Blue/Green/Yellow/Cyan colored reflective walls
     RLGray,          // Gray reflective wall (opens periodically)
-    OneWayForce,     // One-way force field
+    OneWayForce(Direction),     // One-way force field (allows passage in specified direction)
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]

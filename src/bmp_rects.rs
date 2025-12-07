@@ -48,19 +48,22 @@ pub enum BitmapRect {
     TileDrainYellow = 34,
     TileDrainCyan = 35,
     TileDrainGray = 36,
-    TileOneWayForce = 37,
+    TileOneWayForceUp = 37,
+    TileOneWayForceDown = 38,
+    TileOneWayForceLeft = 39,
+    TileOneWayForceRight = 40,
     
     // UI elements
-    NumberDigit0 = 38,
-    NumberDigit1 = 39,
-    NumberDigit2 = 40,
-    NumberDigit3 = 41,
-    NumberDigit4 = 42,
-    NumberDigit5 = 43,
-    NumberDigit6 = 44,
-    NumberDigit7 = 45,
-    NumberDigit8 = 46,
-    NumberDigit9 = 47,
+    NumberDigit0 = 41,
+    NumberDigit1 = 42,
+    NumberDigit2 = 43,
+    NumberDigit3 = 44,
+    NumberDigit4 = 45,
+    NumberDigit5 = 46,
+    NumberDigit6 = 47,
+    NumberDigit7 = 48,
+    NumberDigit8 = 49,
+    NumberDigit9 = 50,
 }
 
 /// Global BMP rectangle coordinator
@@ -137,8 +140,11 @@ impl BmpRects {
         rects.push(Rect { x: 232, y: 67, w: 32, h: 32 });  // Cyan
         rects.push(Rect { x: 34, y: 199, w: 32, h: 32 });  // Gray
         
-        // One-way force tile
-        rects.push(Rect { x: 265, y: 34, w: 32, h: 32 });
+        // One-way force tiles (directional)
+        rects.push(Rect { x: 265, y: 34, w: 32, h: 32 });  // Up
+        rects.push(Rect { x: 298, y: 34, w: 32, h: 32 });  // Down
+        rects.push(Rect { x: 265, y: 67, w: 32, h: 32 });  // Left
+        rects.push(Rect { x: 298, y: 67, w: 32, h: 32 });  // Right
         
         // Number digits 0-9 for UI
         for i in 0..10 {

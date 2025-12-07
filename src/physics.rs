@@ -12,17 +12,19 @@ pub struct Physics;
 
 impl Physics {
     /// Update ball position based on velocity
+    /// delta_time should be in seconds for physics calculations
     pub fn update_ball_position(ball: &mut Ball, delta_time: f64) {
         if !ball.alive || ball.captured {
             return;
         }
         
-        // Apply gravity
+        // Apply gravity (scaled by delta_time for frame-rate independence)
         ball.vy += GRAVITY * delta_time;
         
-        // Apply friction
-        ball.vx *= FRICTION;
-        ball.vy *= FRICTION;
+        // Apply friction (frame-rate independent using power function)
+        let friction_factor = FRICTION.powf(delta_time);
+        ball.vx *= friction_factor;
+        ball.vy *= friction_factor;
         
         // Update position
         ball.x += ball.vx * delta_time;
@@ -110,8 +112,8 @@ impl Physics {
             TileType::RLGray => {
                 Self::deflect_from_rl_gray(ball, tile)
             }
-            TileType::OneWayForce => {
-                Self::deflect_from_owf(ball, tile)
+            TileType::OneWayForce(dir) => {
+                Self::deflect_from_owf(ball, tile, dir)
             }
         }
     }
@@ -252,11 +254,22 @@ impl Physics {
     }
     
     /// Deflect from one-way force field
-    fn deflect_from_owf(ball: &mut Ball, tile: &BoardTile) -> bool {
-        // Note: One-way force fields allow balls to pass in one direction
-        // but block them in the opposite direction
-        // This requires storing the OWF direction and checking ball velocity
-        // For now, treating as a regular wall until direction data is added to TileType::OneWayForce
-        Self::deflect_from_wall(ball, tile)
+    fn deflect_from_owf(ball: &mut Ball, tile: &BoardTile, direction: Direction) -> bool {
+        // One-way force fields allow balls to pass in one direction but block in the opposite
+        // Check if ball is moving against the allowed direction
+        let should_block = match direction {
+            Direction::Up => ball.vy > 0.0,      // Block downward movement
+            Direction::Down => ball.vy < 0.0,    // Block upward movement  
+            Direction::Left => ball.vx > 0.0,    // Block rightward movement
+            Direction::Right => ball.vx < 0.0,   // Block leftward movement
+            _ => false,  // Diagonal directions not typically used for OWF
+        };
+        
+        if should_block {
+            Self::deflect_from_wall(ball, tile)
+        } else {
+            // Allow passage
+            false
+        }
     }
 }

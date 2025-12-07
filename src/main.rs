@@ -79,8 +79,8 @@ fn main() {
         };
         *last_update_clone.borrow_mut() = now;
         
-        // Update game state
-        game_handle2.borrow_mut().update(delta_time * 60.0); // Scale for 60 FPS
+        // Update game state (delta_time is already in seconds)
+        game_handle2.borrow_mut().update(delta_time);
         
         // Trigger redraw
         frame_clone.redraw();
