@@ -11,7 +11,7 @@ use fltk::{
 use std::path::Path;
 use std::rc::Rc;
 use std::cell::RefCell;
-use std::time::{Duration, Instant};
+use std::time::Instant;
 use game::Game;
 use board::{BOARD_ROWS, BOARD_COLS, TILE_SIZE};
 

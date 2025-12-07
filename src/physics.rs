@@ -245,13 +245,18 @@ impl Physics {
     
     /// Deflect from gray reflective wall (opens periodically)
     fn deflect_from_rl_gray(ball: &mut Ball, tile: &BoardTile) -> bool {
-        // For now, treat like regular wall (TODO: add timing logic)
+        // Note: Gray reflective walls should open and close periodically in the original game
+        // This requires game time tracking to implement properly
+        // For now, treating as a regular wall until time management is implemented
         Self::deflect_from_wall(ball, tile)
     }
     
     /// Deflect from one-way force field
     fn deflect_from_owf(ball: &mut Ball, tile: &BoardTile) -> bool {
-        // One-way force field (implementation TBD based on direction)
+        // Note: One-way force fields allow balls to pass in one direction
+        // but block them in the opposite direction
+        // This requires storing the OWF direction and checking ball velocity
+        // For now, treating as a regular wall until direction data is added to TileType::OneWayForce
         Self::deflect_from_wall(ball, tile)
     }
 }

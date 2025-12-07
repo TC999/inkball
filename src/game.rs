@@ -50,10 +50,9 @@ impl Game {
             return;
         }
         
-        // Store tile data for collision checking
-        let tiles = self.board.tiles;
-        let board_rows = tiles.len();
-        let board_cols = if board_rows > 0 { tiles[0].len() } else { 0 };
+        // Get board dimensions for collision checking
+        let board_rows = self.board.tiles.len();
+        let board_cols = if board_rows > 0 { self.board.tiles[0].len() } else { 0 };
         
         // Update all balls
         for ball in &mut self.board.balls {
@@ -86,7 +85,7 @@ impl Game {
                 let tile_col = (ball.x / crate::board::TILE_SIZE as f64) as usize;
                 
                 if tile_row < board_rows && tile_col < board_cols {
-                    if let Some(tile) = tiles[tile_row][tile_col] {
+                    if let Some(tile) = self.board.tiles[tile_row][tile_col] {
                         // Simple collision - just check if we're in a wall tile
                         if matches!(tile.tile_type, crate::tile::TileType::Wall) {
                             // Simple bounce
