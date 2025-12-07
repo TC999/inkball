@@ -6,6 +6,8 @@ use fltk::{
     app, image::BmpImage, prelude::*, window::Window, frame::Frame, draw, enums::Color,
 };
 use std::path::Path;
+use std::rc::Rc;
+use std::cell::RefCell;
 use game::Game;
 use board::{BOARD_ROWS, BOARD_COLS};
 use ball::{BallColor};
@@ -25,6 +27,7 @@ fn main() {
     // 加载 bmp 图像
     let bmp_path = Path::new("assets/img.bmp");
     let bmp_img = BmpImage::load(bmp_path).ok();
+    let bmp_img = bmp_img.map(|img| Rc::new(RefCell::new(img)));
 
     let mut frame = Frame::new(
         0,
@@ -36,12 +39,14 @@ fn main() {
     wind.end();
     wind.show();
 
-    let mut game = Game::new();
+    let game = Rc::new(RefCell::new(Game::new()));
+    let game_handle = Rc::clone(&game);
+    let bmp_img_handle = bmp_img.clone();
 
     frame.handle(move |f, ev| {
         if ev == fltk::enums::Event::Push {
             let (x, y) = (app::event_x(), app::event_y());
-            game.handle_click(x, y, TILE_SIZE);
+            game_handle.borrow_mut().handle_click(x, y, TILE_SIZE);
             f.redraw();
             true
         } else {
@@ -50,7 +55,6 @@ fn main() {
     });
 
     frame.draw(move |_f| {
-        // 绘制棋盘格子
         for row in 0..BOARD_ROWS {
             for col in 0..BOARD_COLS {
                 let x = col as i32 * TILE_SIZE;
@@ -59,9 +63,9 @@ fn main() {
                 draw::set_draw_color(Color::Black);
                 draw::draw_rect(x, y, TILE_SIZE, TILE_SIZE);
                 // 绘制球体
-                if let Some(ball) = game.board.tiles[row][col] {
-                    if let Some(img) = &bmp_img {
-                        img.draw(x, y, TILE_SIZE, TILE_SIZE);
+                if let Some(ball) = game.borrow().board.tiles[row][col] {
+                    if let Some(img_rc) = &bmp_img_handle {
+                        img_rc.borrow_mut().draw(x, y, TILE_SIZE, TILE_SIZE);
                     } else {
                         let color = match ball.color {
                             BallColor::Red => Color::Red,
@@ -69,7 +73,6 @@ fn main() {
                             BallColor::Green => Color::Green,
                         };
                         draw::set_draw_color(color);
-                        // draw::draw_pie(x, y, TILE_SIZE, TILE_SIZE, 0.0, 360.0);
                         let cx = x + TILE_SIZE / 2;
                         let cy = y + TILE_SIZE / 2;
                         let r = TILE_SIZE as f64 / 2.5;
