@@ -61,7 +61,7 @@ fn main() {
                 // 绘制球体
                 if let Some(ball) = game.board.tiles[row][col] {
                     if let Some(img) = &bmp_img {
-                        img.scale_tile(TILE_SIZE, TILE_SIZE, x, y);
+                        img.draw(x, y, TILE_SIZE, TILE_SIZE);
                     } else {
                         let color = match ball.color {
                             BallColor::Red => Color::Red,
@@ -69,7 +69,18 @@ fn main() {
                             BallColor::Green => Color::Green,
                         };
                         draw::set_draw_color(color);
-                        draw::draw_circle(x + TILE_SIZE / 2, y + TILE_SIZE / 2, TILE_SIZE as f64 / 2.5);
+                        // draw::draw_pie(x, y, TILE_SIZE, TILE_SIZE, 0.0, 360.0);
+                        let cx = x + TILE_SIZE / 2;
+                        let cy = y + TILE_SIZE / 2;
+                        let r = TILE_SIZE as f64 / 2.5;
+                        draw::draw_pie(
+                            (cx as f64 - r) as i32,
+                            (cy as f64 - r) as i32,
+                            (r * 2.0) as i32,
+                            (r * 2.0) as i32,
+                            0.0,
+                            360.0,
+                        );
                     }
                 }
             }
