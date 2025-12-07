@@ -2,6 +2,9 @@ use crate::board::GameBoard;
 use crate::ball::BallColor;
 use crate::physics::Physics;
 
+// Import physics constants
+const BOUNCE_FACTOR: f64 = 0.8;
+
 pub struct Game {
     pub board: GameBoard,
     pub score: u32,
@@ -66,18 +69,18 @@ impl Game {
                 
                 if ball.x - ball.radius < 0.0 {
                     ball.x = ball.radius;
-                    ball.vx = -ball.vx * 0.8;
+                    ball.vx = -ball.vx * BOUNCE_FACTOR;
                 } else if ball.x + ball.radius > board_width {
                     ball.x = board_width - ball.radius;
-                    ball.vx = -ball.vx * 0.8;
+                    ball.vx = -ball.vx * BOUNCE_FACTOR;
                 }
                 
                 if ball.y - ball.radius < 0.0 {
                     ball.y = ball.radius;
-                    ball.vy = -ball.vy * 0.8;
+                    ball.vy = -ball.vy * BOUNCE_FACTOR;
                 } else if ball.y + ball.radius > board_height {
                     ball.y = board_height - ball.radius;
-                    ball.vy = -ball.vy * 0.8;
+                    ball.vy = -ball.vy * BOUNCE_FACTOR;
                 }
                 
                 // Check collisions with tiles
@@ -88,9 +91,9 @@ impl Game {
                     if let Some(tile) = self.board.tiles[tile_row][tile_col] {
                         // Simple collision - just check if we're in a wall tile
                         if matches!(tile.tile_type, crate::tile::TileType::Wall) {
-                            // Simple bounce
-                            ball.vx = -ball.vx * 0.8;
-                            ball.vy = -ball.vy * 0.8;
+                            // Simple bounce using consistent bounce factor
+                            ball.vx = -ball.vx * BOUNCE_FACTOR;
+                            ball.vy = -ball.vy * BOUNCE_FACTOR;
                         }
                     }
                 }

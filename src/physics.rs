@@ -7,10 +7,24 @@ use crate::tile::{BoardTile, TileType, Direction};
 const GRAVITY: f64 = 0.15;  // Gravity acceleration
 const FRICTION: f64 = 0.99; // Velocity damping
 const BOUNCE_FACTOR: f64 = 0.8; // Energy loss on bounce
+const DRAIN_CAPTURE_DISTANCE: f64 = 4.0; // Distance within which a drain captures a ball (in tile fractions)
 
 pub struct Physics;
 
 impl Physics {
+    /// Helper function to check if ball and board colors match
+    fn colors_match(ball_color: crate::ball::BallColor, board_color: crate::tile::BoardColor) -> bool {
+        matches!(
+            (ball_color, board_color),
+            (crate::ball::BallColor::Red, crate::tile::BoardColor::Red)
+                | (crate::ball::BallColor::Blue, crate::tile::BoardColor::Blue)
+                | (crate::ball::BallColor::Green, crate::tile::BoardColor::Green)
+                | (crate::ball::BallColor::Yellow, crate::tile::BoardColor::Yellow)
+                | (crate::ball::BallColor::Cyan, crate::tile::BoardColor::Cyan)
+                | (crate::ball::BallColor::Gray, crate::tile::BoardColor::Gray)
+        )
+    }
+    
     /// Update ball position based on velocity
     /// delta_time should be in seconds for physics calculations
     pub fn update_ball_position(ball: &mut Ball, delta_time: f64) {
@@ -217,17 +231,9 @@ impl Physics {
         let dy = ball.y - tile_y;
         let dist = (dx * dx + dy * dy).sqrt();
         
-        if dist < TILE_SIZE as f64 / 4.0 {
+        if dist < TILE_SIZE as f64 / DRAIN_CAPTURE_DISTANCE {
             // Check if ball color matches drain color
-            let ball_matches = match (ball.color, drain_color) {
-                (crate::ball::BallColor::Red, crate::tile::BoardColor::Red) => true,
-                (crate::ball::BallColor::Blue, crate::tile::BoardColor::Blue) => true,
-                (crate::ball::BallColor::Green, crate::tile::BoardColor::Green) => true,
-                (crate::ball::BallColor::Yellow, crate::tile::BoardColor::Yellow) => true,
-                (crate::ball::BallColor::Cyan, crate::tile::BoardColor::Cyan) => true,
-                (crate::ball::BallColor::Gray, crate::tile::BoardColor::Gray) => true,
-                _ => false,
-            };
+            let ball_matches = Self::colors_match(ball.color, drain_color);
             
             if ball_matches {
                 ball.captured = true;
