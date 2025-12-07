@@ -1,4 +1,4 @@
-use crate::board::{GameBoard, BOARD_ROWS, BOARD_COLS};
+use crate::board::GameBoard;
 use crate::ball::{BallColor};
 
 pub struct Game {
