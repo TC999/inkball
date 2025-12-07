@@ -7,6 +7,7 @@ use crate::tile::{BoardTile, TileType, Direction};
 const GRAVITY: f64 = 0.15;  // Gravity acceleration
 const FRICTION: f64 = 0.99; // Velocity damping
 const BOUNCE_FACTOR: f64 = 0.8; // Energy loss on bounce
+const BUMPER_VELOCITY_BOOST: f64 = 1.2; // Velocity multiplier when hitting bumper
 const DRAIN_CAPTURE_DISTANCE: f64 = 4.0; // Distance within which a drain captures a ball (in tile fractions)
 
 pub struct Physics;
@@ -191,7 +192,7 @@ impl Physics {
         if dist < ball.radius + TILE_SIZE as f64 / 2.0 {
             // Bounce in opposite direction with increased velocity
             let angle = dy.atan2(dx);
-            let speed = (ball.vx * ball.vx + ball.vy * ball.vy).sqrt() * 1.2;
+            let speed = (ball.vx * ball.vx + ball.vy * ball.vy).sqrt() * BUMPER_VELOCITY_BOOST;
             ball.vx = angle.cos() * speed;
             ball.vy = angle.sin() * speed;
             
