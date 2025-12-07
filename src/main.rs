@@ -3,6 +3,7 @@ mod board;
 mod game;
 mod tile;
 mod bmp_rects;
+mod physics;
 
 use fltk::{
     app, image::BmpImage, prelude::*, window::Window, frame::Frame, draw, enums::Color,
@@ -10,10 +11,9 @@ use fltk::{
 use std::path::Path;
 use std::rc::Rc;
 use std::cell::RefCell;
+use std::time::{Duration, Instant};
 use game::Game;
 use board::{BOARD_ROWS, BOARD_COLS, TILE_SIZE};
-use ball::BallColor;
-use bmp_rects::BmpRects;
 
 fn main() {
     let app = app::App::default();
@@ -44,15 +44,49 @@ fn main() {
     let game_handle = Rc::clone(&game);
     let bmp_img_handle = bmp_img.clone();
 
+    let game_handle2 = Rc::clone(&game);
     frame.handle(move |f, ev| {
-        if ev == fltk::enums::Event::Push {
-            let (x, y) = (app::event_x(), app::event_y());
-            game_handle.borrow_mut().handle_click(x, y, TILE_SIZE);
-            f.redraw();
-            true
-        } else {
-            false
+        match ev {
+            fltk::enums::Event::Push => {
+                let (x, y) = (app::event_x(), app::event_y());
+                game_handle.borrow_mut().handle_click(x, y, TILE_SIZE);
+                f.redraw();
+                true
+            }
+            fltk::enums::Event::KeyDown => {
+                let key = app::event_key();
+                if key == fltk::enums::Key::from_char('p') || key == fltk::enums::Key::from_char('P') {
+                    game_handle.borrow_mut().toggle_pause();
+                    true
+                } else {
+                    false
+                }
+            }
+            _ => false
         }
+    });
+    
+    // Game update loop using timeout
+    let last_update = Rc::new(RefCell::new(Instant::now()));
+    let mut frame_clone = frame.clone();
+    let last_update_clone = Rc::clone(&last_update);
+    
+    app::add_timeout3(0.016, move |handle| {
+        let now = Instant::now();
+        let delta_time = {
+            let last = *last_update_clone.borrow();
+            now.duration_since(last).as_secs_f64()
+        };
+        *last_update_clone.borrow_mut() = now;
+        
+        // Update game state
+        game_handle2.borrow_mut().update(delta_time * 60.0); // Scale for 60 FPS
+        
+        // Trigger redraw
+        frame_clone.redraw();
+        
+        // Schedule next update
+        app::repeat_timeout3(0.016, handle);
     });
 
     frame.draw(move |_f| {
