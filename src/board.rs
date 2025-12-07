@@ -1,8 +1,8 @@
 use crate::ball::{Ball, BallColor};
 use crate::tile::{BoardTile, TileType};
 
-pub const BOARD_ROWS: usize = 9;
-pub const BOARD_COLS: usize = 9;
+pub const BOARD_ROWS: usize = 17;
+pub const BOARD_COLS: usize = 17;
 pub const TILE_SIZE: i32 = 48;
 
 pub struct GameBoard {
