@@ -130,12 +130,15 @@ impl GameBoard {
         // 设置进球口为 Drain
         tiles[goal_pos.0][goal_pos.1] = Some(BoardTile::new(goal_pos.0, goal_pos.1, TileType::Drain(crate::tile::BoardColor::Gray)));
 
-        Self {
+        let mut board = Self {
             tiles,
             balls: Vec::new(),
             entry_pos,
             goal_pos,
-        }
+        };
+        // 游戏初始化时自动在出球口生成球
+        board.add_ball(entry_pos.0, entry_pos.1, BallColor::Gray);
+        board
     }
 
     pub fn add_ball(&mut self, row: usize, col: usize, color: BallColor) {
