@@ -27,25 +27,8 @@ impl Game {
     pub fn handle_click(&mut self, x: i32, y: i32, tile_size: i32) {
         let row = (y / tile_size) as usize;
         let col = (x / tile_size) as usize;
-        
-        // Cycle through colors on click for testing
-        let color = match (row + col) % 6 {
-            0 => BallColor::Red,
-            1 => BallColor::Blue,
-            2 => BallColor::Green,
-            3 => BallColor::Yellow,
-            4 => BallColor::Cyan,
-            _ => BallColor::Gray,
-        };
-        
-        // Add ball with initial velocity for testing
-        self.board.add_ball(row, col, color);
-        
-        // Give the ball a random initial velocity
-        if let Some(ball) = self.board.balls.last_mut() {
-            ball.vx = (((row + col) % 5) as f64 - 2.0) * 2.0;
-            ball.vy = -3.0; // Start moving upward
-        }
+        // 鼠标点击只画墙，不生成球
+        self.board.draw_wall(row, col);
     }
     
     pub fn update(&mut self, delta_time: f64) {
