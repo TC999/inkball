@@ -8,6 +8,8 @@ pub const TILE_SIZE: i32 = 48;
 pub struct GameBoard {
     pub tiles: [[Option<BoardTile>; BOARD_COLS]; BOARD_ROWS],
     pub balls: Vec<Ball>,
+    pub entry_pos: (usize, usize), // 出球口
+    pub goal_pos: (usize, usize),  // 进球口
 }
 
 impl GameBoard {
@@ -31,9 +33,31 @@ impl GameBoard {
             tiles[row][BOARD_COLS - 1] = Some(BoardTile::new(row, BOARD_COLS - 1, TileType::Wall));
         }
         
+        use rand::Rng;
+        let mut rng = rand::thread_rng();
+        // 随机选取出球口和进球口，不能在最外围
+        let entry_pos = loop {
+            let row = rng.gen_range(1..BOARD_ROWS-1);
+            let col = rng.gen_range(1..BOARD_COLS-1);
+            if tiles[row][col].as_ref().unwrap().tile_type == TileType::Floor {
+                break (row, col);
+            }
+        };
+        let goal_pos = loop {
+            let row = rng.gen_range(1..BOARD_ROWS-1);
+            let col = rng.gen_range(1..BOARD_COLS-1);
+            if (row, col) != entry_pos && tiles[row][col].as_ref().unwrap().tile_type == TileType::Floor {
+                break (row, col);
+            }
+        };
+        // 设置进球口为 Drain
+        tiles[goal_pos.0][goal_pos.1] = Some(BoardTile::new(goal_pos.0, goal_pos.1, TileType::Drain(crate::tile::BoardColor::Gray)));
+
         Self {
             tiles,
             balls: Vec::new(),
+            entry_pos,
+            goal_pos,
         }
     }
 
