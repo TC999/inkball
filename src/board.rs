@@ -13,6 +13,10 @@ pub struct GameBoard {
 }
 
 impl GameBoard {
+                /// 判断是否胜利（有球进入进球口）
+                pub fn is_win(&self) -> bool {
+                    self.balls.iter().any(|ball| ball.captured)
+                }
             /// 鼠标画墙，将指定格子设为 BreakWall
             pub fn draw_wall(&mut self, row: usize, col: usize) {
                 if row > 0 && row < BOARD_ROWS-1 && col > 0 && col < BOARD_COLS-1 {
