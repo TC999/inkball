@@ -57,6 +57,7 @@ pub struct BoardTile {
     pub tile_type: TileType,
     pub shadowed: bool,      // Whether this tile is shadowed
     pub closest_side: u8,    // Which side was hit last (for collision)
+    pub hit_count: u8,       // 被球碰撞次数，笔画墙用
 }
 
 impl BoardTile {
@@ -67,6 +68,7 @@ impl BoardTile {
             tile_type,
             shadowed: false,
             closest_side: 0,
+            hit_count: 0,
         }
     }
     
