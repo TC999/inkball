@@ -13,6 +13,51 @@ pub struct GameBoard {
 }
 
 impl GameBoard {
+        /// 更新所有球的位置和碰撞
+        pub fn update_balls(&mut self) {
+            let tiles = &self.tiles;
+            for ball in &mut self.balls {
+                if !ball.alive || ball.captured {
+                    continue;
+                }
+                // 移动球
+                ball.x += ball.vx;
+                ball.y += ball.vy;
+
+                // 计算球当前所在格子
+                let col = (ball.x / TILE_SIZE as f64).floor() as usize;
+                let row = (ball.y / TILE_SIZE as f64).floor() as usize;
+                ball.row = row;
+                ball.col = col;
+
+                // 检查是否碰到墙
+                if row < BOARD_ROWS && col < BOARD_COLS {
+                    if let Some(tile) = &tiles[row][col] {
+                        match tile.tile_type {
+                            TileType::Wall => {
+                                // 反弹：简单处理，速度取反
+                                let left = (ball.x - ball.radius) < (col as f64 * TILE_SIZE as f64);
+                                let right = (ball.x + ball.radius) > ((col+1) as f64 * TILE_SIZE as f64);
+                                let top = (ball.y - ball.radius) < (row as f64 * TILE_SIZE as f64);
+                                let bottom = (ball.y + ball.radius) > ((row+1) as f64 * TILE_SIZE as f64);
+                                if left || right {
+                                    ball.vx = -ball.vx;
+                                }
+                                if top || bottom {
+                                    ball.vy = -ball.vy;
+                                }
+                            },
+                            TileType::Drain(_) => {
+                                // 进球口，判定胜利
+                                ball.captured = true;
+                                ball.alive = false;
+                            },
+                            _ => {}
+                        }
+                    }
+                }
+            }
+        }
     pub fn new() -> Self {
         let mut tiles = [[None; BOARD_COLS]; BOARD_ROWS];
         
