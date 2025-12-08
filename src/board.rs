@@ -13,9 +13,19 @@ pub struct GameBoard {
 }
 
 impl GameBoard {
+            /// 鼠标画墙，将指定格子设为 BreakWall
+            pub fn draw_wall(&mut self, row: usize, col: usize) {
+                if row > 0 && row < BOARD_ROWS-1 && col > 0 && col < BOARD_COLS-1 {
+                    if let Some(tile) = &mut self.tiles[row][col] {
+                        if matches!(tile.tile_type, TileType::Floor) {
+                            tile.tile_type = TileType::BreakWall;
+                            tile.hit_count = 0;
+                        }
+                    }
+                }
+            }
         /// 更新所有球的位置和碰撞
         pub fn update_balls(&mut self) {
-            let tiles = &self.tiles;
             for ball in &mut self.balls {
                 if !ball.alive || ball.captured {
                     continue;
@@ -30,9 +40,9 @@ impl GameBoard {
                 ball.row = row;
                 ball.col = col;
 
-                // 检查是否碰到墙
+                // 检查是否碰到墙或 BreakWall
                 if row < BOARD_ROWS && col < BOARD_COLS {
-                    if let Some(tile) = &tiles[row][col] {
+                    if let Some(tile) = &mut self.tiles[row][col] {
                         match tile.tile_type {
                             TileType::Wall => {
                                 // 反弹：简单处理，速度取反
@@ -45,6 +55,24 @@ impl GameBoard {
                                 }
                                 if top || bottom {
                                     ball.vy = -ball.vy;
+                                }
+                            },
+                            TileType::BreakWall => {
+                                // 反弹并计数，碰一次后消失
+                                let left = (ball.x - ball.radius) < (col as f64 * TILE_SIZE as f64);
+                                let right = (ball.x + ball.radius) > ((col+1) as f64 * TILE_SIZE as f64);
+                                let top = (ball.y - ball.radius) < (row as f64 * TILE_SIZE as f64);
+                                let bottom = (ball.y + ball.radius) > ((row+1) as f64 * TILE_SIZE as f64);
+                                if left || right {
+                                    ball.vx = -ball.vx;
+                                }
+                                if top || bottom {
+                                    ball.vy = -ball.vy;
+                                }
+                                tile.hit_count += 1;
+                                if tile.hit_count >= 1 {
+                                    tile.tile_type = TileType::Floor;
+                                    tile.hit_count = 0;
                                 }
                             },
                             TileType::Drain(_) => {
