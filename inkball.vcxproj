@@ -74,12 +74,15 @@
     <ClCompile>
       <WarningLevel>Level3</WarningLevel>
       <SDLCheck>true</SDLCheck>
-      <PreprocessorDefinitions>WIN32;_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>WIN32;_DEBUG;_CONSOLE;NOMINMAX;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
+      <LanguageStandard>stdcpp17</LanguageStandard>
+      <AdditionalOptions>/utf-8 %(AdditionalOptions)</AdditionalOptions>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
+      <EntryPoint>wWinMainCRTStartup</EntryPoint>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
@@ -128,6 +131,52 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="src\main.cpp" />
+    <!-- Core Engine (Clean Room) -->
+    <ClCompile Include="src\core\Ball.cpp" />
+    <ClCompile Include="src\core\BallManager.cpp" />
+    <ClCompile Include="src\core\BoardTile.cpp" />
+    <ClCompile Include="src\core\BoardTileBumper.cpp" />
+    <ClCompile Include="src\core\BoardTileBreakWall.cpp" />
+    <ClCompile Include="src\core\BoardTileChevron.cpp" />
+    <ClCompile Include="src\core\BoardTileDrain.cpp" />
+    <ClCompile Include="src\core\BoardTileOWF.cpp" />
+    <ClCompile Include="src\core\BoardTileRLColored.cpp" />
+    <ClCompile Include="src\core\BoardTileRLGray.cpp" />
+    <ClCompile Include="src\core\BoardTileWall.cpp" />
+    <ClCompile Include="src\core\Display.cpp" />
+    <ClCompile Include="src\core\GameBoard.cpp" />
+    <ClCompile Include="src\core\GameManager.cpp" />
+    <ClCompile Include="src\core\Ink.cpp" />
+    <ClCompile Include="src\core\ScoreManager.cpp" />
+    <ClCompile Include="src\core\Sink.cpp" />
+    <ClCompile Include="src\core\TileManager.cpp" />
+    <ClCompile Include="src\core\TimeManager.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="src\core\Ball.h" />
+    <ClInclude Include="src\core\BallManager.h" />
+    <ClInclude Include="src\core\BallPoint.h" />
+    <ClInclude Include="src\core\BoardObject.h" />
+    <ClInclude Include="src\core\BoardTile.h" />
+    <ClInclude Include="src\core\BoardTileBumper.h" />
+    <ClInclude Include="src\core\BoardTileBreakWall.h" />
+    <ClInclude Include="src\core\BoardTileChevron.h" />
+    <ClInclude Include="src\core\BoardTileDrain.h" />
+    <ClInclude Include="src\core\BoardTileOWF.h" />
+    <ClInclude Include="src\core\BoardTileRLColored.h" />
+    <ClInclude Include="src\core\BoardTileRLGray.h" />
+    <ClInclude Include="src\core\BoardTileWall.h" />
+    <ClInclude Include="src\core\Display.h" />
+    <ClInclude Include="src\core\GameBoard.h" />
+    <ClInclude Include="src\core\GameManager.h" />
+    <ClInclude Include="src\core\GameTypes.h" />
+    <ClInclude Include="src\core\Ink.h" />
+    <ClInclude Include="src\core\MathUtils.h" />
+    <ClInclude Include="src\core\MovingObject.h" />
+    <ClInclude Include="src\core\ScoreManager.h" />
+    <ClInclude Include="src\core\Sink.h" />
+    <ClInclude Include="src\core\TileManager.h" />
+    <ClInclude Include="src\core\TimeManager.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
