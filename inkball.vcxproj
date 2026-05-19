@@ -143,6 +143,7 @@
     <ClCompile Include="src\core\BoardTileRLColored.cpp" />
     <ClCompile Include="src\core\BoardTileRLGray.cpp" />
     <ClCompile Include="src\core\BoardTileWall.cpp" />
+    <ClCompile Include="src\core\SpriteAtlas.cpp" />
     <ClCompile Include="src\core\Display.cpp" />
     <ClCompile Include="src\core\GameBoard.cpp" />
     <ClCompile Include="src\core\GameManager.cpp" />
@@ -156,6 +157,7 @@
     <ClInclude Include="src\core\Ball.h" />
     <ClInclude Include="src\core\BallManager.h" />
     <ClInclude Include="src\core\BallPoint.h" />
+    <ClInclude Include="src\core\BitmapRects.h" />
     <ClInclude Include="src\core\BoardObject.h" />
     <ClInclude Include="src\core\BoardTile.h" />
     <ClInclude Include="src\core\BoardTileBumper.h" />
@@ -175,6 +177,7 @@
     <ClInclude Include="src\core\MovingObject.h" />
     <ClInclude Include="src\core\ScoreManager.h" />
     <ClInclude Include="src\core\Sink.h" />
+    <ClInclude Include="src\core\SpriteAtlas.h" />
     <ClInclude Include="src\core\TileManager.h" />
     <ClInclude Include="src\core\TimeManager.h" />
   </ItemGroup>

@@ -3,6 +3,7 @@
 // ============================================================
 
 #include "BallManager.h"
+#include "Display.h"
 #include <algorithm>
 
 namespace inkball {
@@ -122,11 +123,12 @@ void BallManager::CheckBallBallCollisions() {
     }
 }
 
-void BallManager::RenderBalls(Display* /*display*/) {
-    // 渲染每个活动球到 DirectDraw 表面
+void BallManager::RenderBalls(Display* display) {
     for (Ball* ball : m_balls) {
         if (ball->IsActive()) {
-            // display->DrawBall(ball);
+            // Map ball color to sprite ID
+            int32_t spriteId = static_cast<int32_t>(ball->GetColor());
+            display->DrawObject(ball, spriteId);
         }
     }
 }

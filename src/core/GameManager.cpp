@@ -69,6 +69,7 @@ void GameManager::Shutdown() {
     }
 
     if (m_hWnd) {
+        SetWindowLongPtrW(static_cast<HWND>(m_hWnd), GWLP_USERDATA, 0);
         DestroyWindow(static_cast<HWND>(m_hWnd));
         m_hWnd = nullptr;
     }
@@ -82,11 +83,10 @@ void GameManager::Shutdown() {
 bool GameManager::CreateGameWindow(void* hInstance, int32_t nCmdShow) {
     m_windowClassName = L"InkBallCleanRoom";
 
-    // 注册窗口类
     WNDCLASSEXW wc = {};
     wc.cbSize = sizeof(wc);
-    wc.style = CS_HREDRAW | CS_VREDRAW;
-    wc.lpfnWndProc = DefWindowProcW;
+    wc.style = CS_HREDRAW | CS_VREDRAW | CS_DBLCLKS;
+    wc.lpfnWndProc = &GameManager::StaticWndProc;
     wc.hInstance = m_impl->hInstance;
     wc.hCursor = LoadCursorW(nullptr, IDC_ARROW);
     wc.hbrBackground = static_cast<HBRUSH>(GetStockObject(BLACK_BRUSH));
@@ -97,15 +97,15 @@ bool GameManager::CreateGameWindow(void* hInstance, int32_t nCmdShow) {
     }
     m_impl->windowCreated = true;
 
-    // 创建窗口
     m_hWnd = CreateWindowExW(
         0,
         m_windowClassName.c_str(),
         L"InkBall (Clean Room Implementation)",
         WS_OVERLAPPEDWINDOW,
         CW_USEDEFAULT, CW_USEDEFAULT,
-        800, 650, // 有效游戏区域 + 标题栏
-        nullptr, nullptr, m_impl->hInstance, nullptr);
+        800, 650,
+        nullptr, nullptr, m_impl->hInstance,
+        this);   // 通过 lpParam 传递 GameManager 指针
 
     if (!m_hWnd) return false;
 
@@ -113,6 +113,114 @@ bool GameManager::CreateGameWindow(void* hInstance, int32_t nCmdShow) {
     UpdateWindow(static_cast<HWND>(m_hWnd));
 
     return true;
+}
+
+// ---- 静态窗口过程 ----
+LRESULT CALLBACK GameManager::StaticWndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam) {
+    GameManager* pThis = nullptr;
+
+    if (msg == WM_NCCREATE) {
+        CREATESTRUCT* pCreate = reinterpret_cast<CREATESTRUCT*>(lParam);
+        pThis = static_cast<GameManager*>(pCreate->lpCreateParams);
+        if (pThis) {
+            pThis->m_hWnd = hWnd;
+            SetWindowLongPtrW(hWnd, GWLP_USERDATA, reinterpret_cast<LONG_PTR>(pThis));
+        }
+    } else {
+        pThis = reinterpret_cast<GameManager*>(GetWindowLongPtrW(hWnd, GWLP_USERDATA));
+    }
+
+    if (pThis) {
+        return pThis->HandleMessage(hWnd, msg, wParam, lParam);
+    }
+
+    return DefWindowProcW(hWnd, msg, wParam, lParam);
+}
+
+// ---- 消息处理 ----
+LRESULT GameManager::HandleMessage(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam) {
+    switch (msg) {
+    case WM_DESTROY:
+        PostQuitMessage(0);
+        return 0;
+
+    case WM_PAINT: {
+        PAINTSTRUCT ps;
+        BeginPaint(hWnd, &ps);
+
+        // 立即触发一帧渲染
+        if (m_board) {
+            RECT clientRect;
+            GetClientRect(hWnd, &clientRect);
+            if (clientRect.right - clientRect.left > 0 &&
+                clientRect.bottom - clientRect.top > 0) {
+                m_board->Render();
+            }
+        }
+
+        EndPaint(hWnd, &ps);
+        return 0;
+    }
+
+    case WM_ERASEBKGND:
+        return 1; // 不擦除背景，由我们的渲染接管
+
+    case WM_LBUTTONDOWN: {
+        POINT pt = { static_cast<int32_t>(LOWORD(lParam)), static_cast<int32_t>(HIWORD(lParam)) };
+        ProcessMouseEvent(pt.x, pt.y, MK_LBUTTON);
+        SetCapture(hWnd);
+        return 0;
+    }
+
+    case WM_LBUTTONUP:
+        ReleaseCapture();
+        if (GetInk()) {
+            GetInk()->EndStroke();
+        }
+        return 0;
+
+    case WM_RBUTTONDOWN: {
+        POINT pt = { static_cast<int32_t>(LOWORD(lParam)), static_cast<int32_t>(HIWORD(lParam)) };
+        ProcessMouseEvent(pt.x, pt.y, MK_RBUTTON);
+        return 0;
+    }
+
+    case WM_MOUSEMOVE: {
+        POINT pt = { static_cast<int32_t>(LOWORD(lParam)), static_cast<int32_t>(HIWORD(lParam)) };
+        ProcessMouseEvent(pt.x, pt.y, static_cast<int32_t>(wParam));
+        return 0;
+    }
+
+    case WM_KEYDOWN:
+        ProcessKeyboardEvent(static_cast<int32_t>(wParam), true);
+        return 0;
+
+    case WM_SIZE:
+        if (m_board) {
+            RECT clientRect;
+            GetClientRect(hWnd, &clientRect);
+            int32_t w = clientRect.right - clientRect.left;
+            int32_t h = clientRect.bottom - clientRect.top;
+            if (w > 0 && h > 0) {
+                m_board->GetDisplay()->RestoreAllSurfaces();
+            }
+        }
+        return 0;
+
+    case WM_SYSCOMMAND:
+        if ((wParam & 0xFFF0) == SC_SCREENSAVE ||
+            (wParam & 0xFFF0) == SC_MONITORPOWER) {
+            return 0;
+        }
+        break;
+
+    case WM_CLOSE:
+        m_isRunning = false;
+        PostQuitMessage(0);
+        return 0;
+    }
+
+    return DefWindowProcW(hWnd, msg, wParam, lParam);
 }
 
 void GameManager::PerformGameUpdate() {

@@ -42,6 +42,9 @@ bool GameBoard::Initialize(void* hWnd, int32_t width, int32_t height) {
         return false;
     }
 
+    // 1b. 加载外置精灵图集
+    m_display->LoadSpriteAtlas(L"assets\\BITMAP501_1.bmp");
+
     // 2. 初始化瓦片管理器
     m_tileManager->Reset(m_gridColumns, m_gridRows, m_tileSize);
     m_tileManager->InitSurface(m_display.get());

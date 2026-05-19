@@ -3,6 +3,7 @@
 // ============================================================
 
 #include "TileManager.h"
+#include "Display.h"
 #include <stdexcept>
 
 namespace inkball {
@@ -112,12 +113,11 @@ void TileManager::GetSurroundingTiles(
     addIfUnique((left + right) / 2, (top + bottom) / 2);
 }
 
-void TileManager::Render(Display* /*display*/) {
-    // 渲染所有瓦片到面板表面
-    // 遍历 m_grid，对每个非空瓦片渲染其精灵
+void TileManager::Render(Display* display) {
+    if (!display) return;
     for (BoardTile* tile : m_grid) {
-        if (tile) {
-            // display->DrawTile(tile);
+        if (tile && tile->GetCategory() != TileCategory::Floor) {
+            display->DrawObject(tile, tile->SpriteId());
         }
     }
 }

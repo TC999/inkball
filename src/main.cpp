@@ -1,12 +1,15 @@
+// ============================================================
+// Main entry - console bridge + game loop
+// All window messages handled internally by GameManager
+// ============================================================
+
 #include <Windows.h>
-#include <wrl/client.h>
 #include <random>
 #include <string>
 #include <memory>
 #include <cstdio>
 
 #include "core/GameManager.h"
-#include "core/Ink.h"
 
 using namespace inkball;
 
@@ -22,60 +25,6 @@ void DebugPrint(const wchar_t* fmt, ...) {
 
 void ShowError(const wchar_t* msg) {
     MessageBoxW(nullptr, msg, L"Error", MB_ICONERROR | MB_OK);
-}
-
-LRESULT CALLBACK GameWindowProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam) {
-    if (!g_pGameManager) return DefWindowProcW(hWnd, msg, wParam, lParam);
-
-    switch (msg) {
-    case WM_DESTROY:
-        PostQuitMessage(0);
-        return 0;
-    case WM_PAINT: {
-        PAINTSTRUCT ps;
-        BeginPaint(hWnd, &ps);
-        EndPaint(hWnd, &ps);
-        return 0;
-    }
-    case WM_MOUSEMOVE: {
-        int32_t x = static_cast<int32_t>(LOWORD(lParam));
-        int32_t y = static_cast<int32_t>(HIWORD(lParam));
-        int32_t buttons = static_cast<int32_t>(wParam);
-        g_pGameManager->ProcessMouseEvent(x, y, buttons);
-        return 0;
-    }
-    case WM_LBUTTONDOWN: {
-        int32_t x = static_cast<int32_t>(LOWORD(lParam));
-        int32_t y = static_cast<int32_t>(HIWORD(lParam));
-        g_pGameManager->ProcessMouseEvent(x, y, MK_LBUTTON);
-        SetCapture(hWnd);
-        return 0;
-    }
-    case WM_LBUTTONUP:
-        ReleaseCapture();
-        if (g_pGameManager->GetInk()) {
-            g_pGameManager->GetInk()->EndStroke();
-        }
-        return 0;
-    case WM_RBUTTONDOWN: {
-        int32_t x = static_cast<int32_t>(LOWORD(lParam));
-        int32_t y = static_cast<int32_t>(HIWORD(lParam));
-        g_pGameManager->ProcessMouseEvent(x, y, MK_RBUTTON);
-        return 0;
-    }
-    case WM_KEYDOWN:
-        g_pGameManager->ProcessKeyboardEvent(static_cast<int32_t>(wParam), true);
-        return 0;
-    case WM_SIZE:
-        return 0;
-    case WM_SYSCOMMAND:
-        if ((wParam & 0xFFF0) == SC_SCREENSAVE ||
-            (wParam & 0xFFF0) == SC_MONITORPOWER) {
-            return 0;
-        }
-        return DefWindowProcW(hWnd, msg, wParam, lParam);
-    }
-    return DefWindowProcW(hWnd, msg, wParam, lParam);
 }
 
 void InitTracing() {
@@ -124,7 +73,6 @@ static int RunGame(HINSTANCE hInstance, LPWSTR lpCmdLine, int nCmdShow) {
     while (g_pGameManager->IsRunning()) {
         while (PeekMessageW(&msg, nullptr, 0, 0, PM_REMOVE)) {
             if (msg.message == WM_QUIT) {
-                g_pGameManager->Shutdown();
                 g_pGameManager.reset();
                 CoUninitialize();
                 CleanupTracing();
@@ -149,7 +97,7 @@ static int RunGame(HINSTANCE hInstance, LPWSTR lpCmdLine, int nCmdShow) {
     return 0;
 }
 
-// Console subsystem bridge: main -> wWinMain
+// Console subsystem bridge
 int main() {
     return RunGame(GetModuleHandleW(nullptr), GetCommandLineW(), SW_SHOWDEFAULT);
 }

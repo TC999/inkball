@@ -47,6 +47,10 @@ public:
 private:
     bool CreateGameWindow(void* hInstance, int32_t nCmdShow);
 
+    // 窗口过程（静态回调 + 实例方法）
+    static LRESULT CALLBACK StaticWndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam);
+    LRESULT HandleMessage(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam);
+
     std::unique_ptr<GameBoard> m_board;
     void* m_hWnd = nullptr;
     bool m_isRunning = false;
