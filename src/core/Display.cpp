@@ -29,6 +29,7 @@ bool Display::Initialize(void* hWnd, int32_t width, int32_t height) {
 
 void Display::Shutdown() {
     m_atlas.reset();
+    m_bitmapRects.reset();
     m_boardSurface.pixels.clear();
     m_inkSurface.pixels.clear();
     m_backSurface.pixels.clear();
@@ -68,6 +69,30 @@ bool Display::LoadSpriteAtlas(const std::wstring& path) {
     if (!atlas->LoadFromFile(path)) return false;
     m_atlas = std::move(atlas);
     return true;
+}
+
+// --- sprite rectangles ---
+bool Display::LoadBitmapRects(const std::wstring& configPath) {
+    auto rects = std::make_unique<BitmapRects>();
+
+    // 尝试从配置文件加载
+    if (rects->LoadConfiguration(configPath)) {
+        m_bitmapRects = std::move(rects);
+        return true;
+    }
+
+    // 回退：自动检测
+    if (m_atlas && m_atlas->width > 0 && m_atlas->height > 0) {
+        int32_t count = rects->AutoDetect(*m_atlas);
+        if (count > 0) {
+            // 导出检测结果供后续调整
+            rects->ExportConfiguration(configPath);
+            m_bitmapRects = std::move(rects);
+            return true;
+        }
+    }
+
+    return false;
 }
 
 // --- frame lifecycle ---
@@ -140,8 +165,8 @@ void Display::FillRect(int32_t x, int32_t y, int32_t w, int32_t h, uint32_t colo
 // Draw a sprite from the atlas onto the board surface.
 // Applies magenta (0xFF00FF) transparency key.
 void Display::DrawSprite(int32_t destX, int32_t destY, int32_t spriteId) {
-    if (!m_atlas) {
-        // fallback: colored rectangle
+    // 若未加载图集或未配置切分信息，使用回退纯色矩形
+    if (!m_atlas || !m_bitmapRects || !m_bitmapRects->IsValid()) {
         static const uint32_t kFallbackColors[] = {
             0xFF808080, 0xFF0000FF, 0xFF00FF00, 0xFFFF0000,
             0xFFFFFF00, 0xFFFF00FF, 0xFFFFA500, 0xFFA0A0A0
@@ -150,7 +175,7 @@ void Display::DrawSprite(int32_t destX, int32_t destY, int32_t spriteId) {
         return;
     }
 
-    Rect src = BitmapRects::GetSpriteRect(spriteId);
+    Rect src = m_bitmapRects->GetSpriteRect(spriteId);
 
     for (int32_t dy = 0; dy < src.Height(); ++dy) {
         int32_t screenY = destY + dy;

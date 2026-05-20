@@ -14,6 +14,7 @@ namespace inkball {
 class BoardObject;
 class Ball;
 class SpriteAtlas;
+class BitmapRects;
 
 class Display {
 public:
@@ -29,6 +30,9 @@ public:
 
     // --- sprite atlas ---
     bool LoadSpriteAtlas(const std::wstring& path);
+
+    // --- sprite rectangles ---
+    bool LoadBitmapRects(const std::wstring& configPath);
 
     // --- accessors ---
     bool IsReady() const { return m_isReady && m_atlas != nullptr; }
@@ -67,6 +71,7 @@ private:
     Surface m_backSurface;
 
     std::unique_ptr<SpriteAtlas> m_atlas;
+    std::unique_ptr<BitmapRects> m_bitmapRects;
 
     uint32_t m_colorKeyLow  = 0x010101;
     uint32_t m_colorKeyHigh = 0xFFFFFF;

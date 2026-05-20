@@ -143,6 +143,7 @@
     <ClCompile Include="src\core\BoardTileRLColored.cpp" />
     <ClCompile Include="src\core\BoardTileRLGray.cpp" />
     <ClCompile Include="src\core\BoardTileWall.cpp" />
+    <ClCompile Include="src\core\BitmapRects.cpp" />
     <ClCompile Include="src\core\SpriteAtlas.cpp" />
     <ClCompile Include="src\core\Display.cpp" />
     <ClCompile Include="src\core\GameBoard.cpp" />
