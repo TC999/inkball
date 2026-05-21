@@ -107,6 +107,17 @@ bool GameBoard::LoadLevel(const std::vector<uint32_t>& tileData,
         m_tileManager->CreateTileAt(gx, gy, encoded);
     }
 
+    // 填充所有未设置的位置为地板瓦片
+    TileEncoding floorEnc;
+    floorEnc.SetCategory(static_cast<uint32_t>(TileCategory::Floor));
+    for (int32_t gy = 0; gy < m_gridRows; ++gy) {
+        for (int32_t gx = 0; gx < m_gridColumns; ++gx) {
+            if (!m_tileManager->GetTileAt(gx, gy)) {
+                m_tileManager->CreateTileAt(gx, gy, floorEnc.Encode());
+            }
+        }
+    }
+
     // 根据难度添加初始球
     int32_t initialBalls = 3 + static_cast<int32_t>(m_difficulty);
     double baseSpeed = 50.0 + static_cast<int32_t>(m_difficulty) * 20.0;

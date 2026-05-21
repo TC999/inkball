@@ -116,7 +116,7 @@ void TileManager::GetSurroundingTiles(
 void TileManager::Render(Display* display) {
     if (!display) return;
     for (BoardTile* tile : m_grid) {
-        if (tile && tile->GetCategory() != TileCategory::Floor) {
+        if (tile) {
             display->DrawObject(tile, tile->SpriteId());
         }
     }
